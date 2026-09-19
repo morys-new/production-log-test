@@ -25,10 +25,10 @@ _results: list[tuple[str, str, str]] = []  # (status, label, hint)
 
 def _record(status: str, label: str, hint: str = "") -> None:
     _results.append((status, label, hint))
-    icon = {"PASS": "✓", "WARN": "!", "FAIL": "✗"}[status]
+    icon = {"PASS": "+", "WARN": "!", "FAIL": "x"}[status]
     line = f"  [{icon}] {status:<4}  {label}"
     if hint:
-        line += f"\n             → {hint}"
+        line += f"\n             -> {hint}"
     print(line)
 
 
@@ -64,7 +64,7 @@ def check_node() -> None:
 def check_npm() -> None:
     npm_path = shutil.which("npm")
     if npm_path is None:
-        _record("FAIL", "npm not found", "npm is bundled with Node — install Node 20+.")
+        _record("FAIL", "npm not found", "npm is bundled with Node -- install Node 20+.")
         return
     out = subprocess.run([npm_path, "--version"], capture_output=True, text=True)
     _record("PASS", f"npm {out.stdout.strip()}")
@@ -117,7 +117,7 @@ def _parse_host_port(url: str) -> tuple[str, int]:
 
 def check_database(database_url: str | None) -> None:
     if database_url is None:
-        _record("FAIL", "DATABASE_URL not set — skipping DB check", "Fix backend/.env first.")
+        _record("FAIL", "DATABASE_URL not set -- skipping DB check", "Fix backend/.env first.")
         return
 
     masked = _mask(database_url)
@@ -130,7 +130,7 @@ def check_database(database_url: str | None) -> None:
         _record(
             "FAIL",
             f"DB TCP {host}:{port} unreachable",
-            f"{exc}  — is Postgres running?  (docker compose up -d db)",
+            f"{exc}  -- is Postgres running?  (docker compose up -d prodlog-db)",
         )
         return
 
@@ -151,7 +151,7 @@ def check_database(database_url: str | None) -> None:
         ver = asyncio.run(_ping())
         major = int(ver.split()[1].split(".")[0])
         if major >= 13:
-            _record("PASS", f"Postgres {ver.split()[1]} — reachable and SELECT 1 OK")
+            _record("PASS", f"Postgres {ver.split()[1]} -- reachable and SELECT 1 OK")
         else:
             _record(
                 "FAIL",
@@ -202,7 +202,7 @@ def check_ports() -> None:
                 _record(
                     "WARN",
                     f"Port {port} already in use",
-                    f"Another process is on :{port} — stop it or it will conflict.",
+                    f"Another process is on :{port} -- stop it or it will conflict.",
                 )
         except OSError:
             _record("PASS", f"Port {port} free")

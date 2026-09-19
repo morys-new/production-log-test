@@ -17,7 +17,7 @@ from pathlib import Path
 try:
     import asyncpg
 except ImportError:
-    sys.exit("asyncpg not found — activate the virtual environment first.")
+    sys.exit("asyncpg not found -- activate the virtual environment first.")
 
 MIGRATION_FILE = Path(__file__).resolve().parent.parent / "migration.sql"
 
@@ -50,13 +50,13 @@ async def _run(database_url: str, reset: bool) -> None:
     try:
         async with conn.transaction():
             if reset:
-                print("Dropping and recreating public schema…")
+                print("Dropping and recreating public schema...")
                 await conn.execute("DROP SCHEMA public CASCADE")
                 await conn.execute("CREATE SCHEMA public")
 
             sql = MIGRATION_FILE.read_text(encoding="utf-8").strip()
             if not _has_ddl(sql):
-                print("migration.sql contains no DDL — nothing to apply.")
+                print("migration.sql contains no DDL -- nothing to apply.")
             else:
                 await conn.execute(sql)
                 print("Migration applied successfully.")
@@ -82,7 +82,7 @@ def _load_database_url() -> str:
 
     sys.exit(
         "DATABASE_URL not set.\n"
-        "  Option 1: copy backend/.env.example → backend/.env\n"
+        "  Option 1: copy backend/.env.example -> backend/.env\n"
         "            then edit credentials if needed.\n"
         "  Option 2: export DATABASE_URL=postgresql://... before running this script."
     )
