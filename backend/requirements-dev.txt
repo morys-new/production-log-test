@@ -1,0 +1,6 @@
+-r requirements.txt
+ruff==0.8.6
+mypy==1.14.1
+# asyncpg ships inline types from 0.29+; stubs package kept for completeness.
+# If asyncpg-stubs 0.30.0 is not on PyPI, omit this line — mypy still passes.
+asyncpg-stubs==0.30.0

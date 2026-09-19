@@ -1,0 +1,3 @@
+-- migration.sql
+-- Add your DDL here. Run:  python scripts/apply_migration.py
+-- The entire file executes in a single transaction; any error rolls back everything.
