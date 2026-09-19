@@ -23,7 +23,7 @@ python scripts/doctor.py
 **Option A — Docker (recommended)**
 
 ```bash
-docker compose up -d db
+docker compose up -d prodlog-db
 ```
 
 **Option B — local Postgres**
