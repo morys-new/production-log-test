@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     database_url: str = (
-        "postgresql://postgres:postgres@localhost:5432/production_log_test"
+        "postgresql://postgres:postgres@localhost:5434/production_log_test"
     )
     cors_origins: str = "http://localhost:3000,http://localhost:8081"
 

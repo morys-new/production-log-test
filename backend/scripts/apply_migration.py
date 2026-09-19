@@ -5,6 +5,8 @@ Usage (run from the repo root or from backend/):
     python backend/scripts/apply_migration.py
     python backend/scripts/apply_migration.py --reset --yes
 """
+from __future__ import annotations
+
 import argparse
 import asyncio
 import os
@@ -80,7 +82,8 @@ def _load_database_url() -> str:
 
     sys.exit(
         "DATABASE_URL not set.\n"
-        "  Option 1: copy backend/.env.example → backend/.env and fill in credentials.\n"
+        "  Option 1: copy backend/.env.example → backend/.env\n"
+        "            then edit credentials if needed.\n"
         "  Option 2: export DATABASE_URL=postgresql://... before running this script."
     )
 

@@ -5,6 +5,7 @@ Run from the repository root:
     python scripts/doctor.py
 """
 import importlib
+import importlib.util
 import os
 import platform
 import re
@@ -43,10 +44,11 @@ def check_python() -> None:
 
 
 def check_node() -> None:
-    if shutil.which("node") is None:
+    node_path = shutil.which("node")
+    if node_path is None:
         _record("FAIL", "Node not found", "Install Node 20+ from https://nodejs.org")
         return
-    out = subprocess.run(["node", "--version"], capture_output=True, text=True)
+    out = subprocess.run([node_path, "--version"], capture_output=True, text=True)
     ver = out.stdout.strip().lstrip("v")
     try:
         major = int(ver.split(".")[0])
@@ -60,18 +62,20 @@ def check_node() -> None:
 
 
 def check_npm() -> None:
-    if shutil.which("npm") is None:
+    npm_path = shutil.which("npm")
+    if npm_path is None:
         _record("FAIL", "npm not found", "npm is bundled with Node — install Node 20+.")
         return
-    out = subprocess.run(["npm", "--version"], capture_output=True, text=True)
+    out = subprocess.run([npm_path, "--version"], capture_output=True, text=True)
     _record("PASS", f"npm {out.stdout.strip()}")
 
 
 def check_git() -> None:
-    if shutil.which("git") is None:
+    git_path = shutil.which("git")
+    if git_path is None:
         _record("FAIL", "git not found", "Install git from https://git-scm.com")
         return
-    out = subprocess.run(["git", "--version"], capture_output=True, text=True)
+    out = subprocess.run([git_path, "--version"], capture_output=True, text=True)
     _record("PASS", out.stdout.strip())
 
 
@@ -230,8 +234,9 @@ def main() -> None:
     print(f"  OS      : {platform.system()} {platform.release()} ({platform.machine()})")
     print(f"  Python  : {sys.version.split()[0]}")
     node_ver = "n/a"
-    if shutil.which("node"):
-        r = subprocess.run(["node", "--version"], capture_output=True, text=True)
+    _node_path = shutil.which("node")
+    if _node_path:
+        r = subprocess.run([_node_path, "--version"], capture_output=True, text=True)
         node_ver = r.stdout.strip()
     print(f"  Node    : {node_ver}")
     print(f"  Checks  : {passes} PASS  {warns} WARN  {fails} FAIL")
