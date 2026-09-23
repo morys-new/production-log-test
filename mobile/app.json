@@ -1,0 +1,18 @@
+{
+  "expo": {
+    "name": "ProdLog",
+    "slug": "prodlog",
+    "version": "1.0.0",
+    "scheme": "prodlog",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
