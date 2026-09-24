@@ -1,6 +1,8 @@
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from urllib.parse import urlparse
 
+import asyncpg
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -12,7 +14,16 @@ from routers.health import router as health_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    await create_pool(get_settings().database_url)
+    database_url = get_settings().database_url
+    try:
+        await create_pool(database_url)
+    except (OSError, asyncpg.PostgresError) as exc:
+        target = urlparse(database_url)
+        raise RuntimeError(
+            f"Cannot connect to Postgres at {target.hostname}:{target.port} "
+            f"(database '{target.path.lstrip('/')}'): {exc}\n"
+            "Is Postgres running? Try: docker compose up -d prodlog-db"
+        ) from None
     yield
     await close_pool()
 
