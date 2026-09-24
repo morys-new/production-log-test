@@ -11,8 +11,11 @@ and shows the layering conventions you are expected to follow.
 
 ### 1. Prerequisites
 
-- Python 3.10+, Node 20+, git, and either Docker or a local Postgres 13+ installation.
-- Run the doctor first (stdlib only, safe to run before installing anything):
+- Python 3.10+, git, and either Docker or a local Postgres 13+ installation.
+- Node 20.19.4+ (or 22.13+, 24.3+) and npm. The mobile toolchain (React Native 0.86) rejects
+  older Node 20/22 releases. `nvm install 20` picks a compatible version.
+- Run the doctor first (stdlib only, safe to run before installing anything). Expect a few
+  FAILs until setup is done; run it again at the end with the backend venv activated:
 
 ```bash
 python scripts/doctor.py
@@ -29,12 +32,11 @@ docker compose up -d prodlog-db
 **Option B — local Postgres**
 
 ```bash
-# bash
-createdb production_log_test
-
-# PowerShell
 createdb production_log_test
 ```
+
+Then set `DATABASE_URL` in `backend/.env` (created in step 3) to your own user, password and
+port. A local install usually listens on 5432; the Docker setup uses 5434.
 
 ### 3. Backend
 
@@ -43,7 +45,7 @@ createdb production_log_test
 cd backend
 python -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 cp .env.example .env          # edit DATABASE_URL if your credentials differ
 python scripts/apply_migration.py
 uvicorn main:app --reload
@@ -52,7 +54,7 @@ uvicorn main:app --reload
 cd backend
 python -m venv .venv
 .venv\Scripts\Activate.ps1    # if blocked: Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 cp .env.example .env
 python scripts/apply_migration.py
 uvicorn main:app --reload
@@ -88,7 +90,7 @@ npx expo start --web     # web is the minimum; emulator/device are optional
 production-log-test/
   README.md                     you are here
   TASK.md                       task specification (populated at session start)
-  docker-compose.yml            Postgres 16 on port $POSTGRES_PORT (default 5432)
+  docker-compose.yml            Postgres 16 on host port $POSTGRES_PORT (default 5434)
   scripts/doctor.py             stdlib-only environment checker
   shared/types.ts               shared TypeScript types (import type only, never redefined)
   backend/
@@ -102,10 +104,10 @@ production-log-test/
     migration.sql               your DDL goes here
     scripts/apply_migration.py  applies migration.sql in one transaction
     requirements.txt            pinned runtime deps
-    requirements-dev.txt        adds ruff, mypy, stubs
+    requirements-dev.txt        runtime deps plus ruff, mypy, stubs
     pyproject.toml              ruff + mypy config (target py310)
-  web/                          Next.js app (App Router) — see web/README when added
-  mobile/                       Expo app — see mobile/README when added
+  web/                          Next.js app (App Router)
+  mobile/                       Expo app (expo-router)
 ```
 
 ## Non-negotiable conventions
@@ -152,7 +154,9 @@ errors.py
 | Start web | `cd web && npm run dev` |
 | Web lint | `cd web && npm run lint` |
 | Web types | `cd web && npm run type-check` |
+| Web build | `cd web && npm run build` |
 | Start mobile (web) | `cd mobile && npx expo start --web` |
+| Mobile lint | `cd mobile && npm run lint` |
 | Mobile types | `cd mobile && npm run type-check` |
 
 ## Mobile networking notes
@@ -165,7 +169,7 @@ Set `EXPO_PUBLIC_API_BASE_URL` in `mobile/.env` accordingly.
 
 At minimum, verify the mobile app compiles and renders with `npx expo start --web`.
 Emulator/device testing is optional for this exercise.
-Expo Go on your device must match the SDK version declared in `mobile/app.json`.
+Expo Go on your device must support the Expo SDK in `mobile/package.json` (SDK 57).
 
 ## Troubleshooting
 
@@ -174,11 +178,27 @@ Expo Go on your device must match the SDK version declared in `mobile/app.json`.
 # find the PID and kill it, or change the port:
 uvicorn main:app --reload --port 8001
 ```
+If you move the backend, update `NEXT_PUBLIC_API_BASE_URL` in `web/.env` and
+`EXPO_PUBLIC_API_BASE_URL` in `mobile/.env` to match.
+
+**Postgres port already taken, or auth fails against the wrong server**
+Another Postgres on the same port answers first, with different credentials. Pick a free port:
+```bash
+# bash
+POSTGRES_PORT=5435 docker compose up -d prodlog-db
+# PowerShell
+$env:POSTGRES_PORT = "5435"; docker compose up -d prodlog-db
+```
+and use the same port in `DATABASE_URL` in `backend/.env`.
+
+**Backend exits at startup with "Cannot connect to Postgres"**
+Postgres is not running or `DATABASE_URL` points at the wrong host or port.
+Start it (`docker compose up -d prodlog-db`) and check `backend/.env`.
 
 **Postgres auth / role error**
 Your local Postgres may require a different user. Edit `DATABASE_URL` in `backend/.env`:
 ```
-DATABASE_URL=postgresql://<user>:<password>@localhost:5432/production_log_test
+DATABASE_URL=postgresql://<user>:<password>@localhost:<port>/production_log_test
 ```
 Make sure the role has `CREATE TABLE` privileges on the database.
 
@@ -188,7 +208,7 @@ This function is built-in from Postgres 13. If you see this error, upgrade your 
 **CORS error in browser**
 The backend reads `CORS_ORIGINS` from `backend/.env`. Add your frontend origin:
 ```
-CORS_ORIGINS=http://localhost:3000,http://localhost:8000
+CORS_ORIGINS=http://localhost:3000,http://localhost:8081
 ```
 
 **PowerShell: `.venv\Scripts\Activate.ps1` blocked**
@@ -200,8 +220,8 @@ Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 Use nvm: `nvm install 20 && nvm use 20`. Or download directly from https://nodejs.org.
 
 **`docker compose` not found**
-On older Docker installs it is `docker-compose` (with a hyphen). Either upgrade Docker Desktop
-or alias it: `alias docker compose='docker-compose'`.
+Older Docker installs ship it as `docker-compose` (with a hyphen). Use that spelling, or
+upgrade Docker Desktop.
 
 ## Fair game
 

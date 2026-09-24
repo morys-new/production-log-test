@@ -51,14 +51,24 @@ def check_node() -> None:
     out = subprocess.run([node_path, "--version"], capture_output=True, text=True)
     ver = out.stdout.strip().lstrip("v")
     try:
-        major = int(ver.split(".")[0])
+        version = tuple(int(part) for part in ver.split(".")[:3])
     except ValueError:
-        major = 0
+        version = (0, 0, 0)
     label = f"Node {ver}"
-    if major >= 20:
-        _record("PASS", label)
+    if version < (20, 9, 0):
+        _record("FAIL", label, "Upgrade to Node 20.19.4+ (use nvm or https://nodejs.org).")
+    elif not (
+        (20, 19, 4) <= version < (21,)
+        or (22, 13, 0) <= version < (23,)
+        or version >= (24, 3, 0)
+    ):
+        _record(
+            "WARN",
+            label,
+            "Web works, but mobile needs Node 20.19.4+, 22.13+ or 24.3+.",
+        )
     else:
-        _record("FAIL", label, "Upgrade to Node 20+ (use nvm or https://nodejs.org).")
+        _record("PASS", label)
 
 
 def check_npm() -> None:
