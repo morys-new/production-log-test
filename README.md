@@ -1,8 +1,8 @@
 # ProdLog — Nawasentra's Junior Software Engineer Hiring Coding Test Repo
 
 A pre-wired scaffold for a 90-minute live coding test. The product requirements are **not** in
-this repository — they are in your invitation email (a copy is in [`TASK.md`](TASK.md) once
-your session begins).
+this file. The specification is sent to you when the session starts; paste it into
+[`TASK.md`](TASK.md) for reference.
 
 Your job is to design the schema, API, and data shapes. This repo removes environment friction
 and shows the layering conventions you are expected to follow.
@@ -36,7 +36,7 @@ createdb production_log_test
 ```
 
 Then set `DATABASE_URL` in `backend/.env` (created in step 3) to your own user, password and
-port. A local install usually listens on 5432; the Docker setup uses 5434.
+port. Docker and a default local install both use 5432; if that port is taken, see Troubleshooting.
 
 ### 3. Backend
 
@@ -89,8 +89,8 @@ npx expo start --web     # web is the minimum; emulator/device are optional
 ```
 production-log-test/
   README.md                     you are here
-  TASK.md                       task specification (populated at session start)
-  docker-compose.yml            Postgres 16 on host port $POSTGRES_PORT (default 5434)
+  TASK.md                       paste the task specification here at session start
+  docker-compose.yml            Postgres 16 on host port $POSTGRES_PORT (default 5432)
   scripts/doctor.py             stdlib-only environment checker
   shared/types.ts               shared TypeScript types (import type only, never redefined)
   backend/
