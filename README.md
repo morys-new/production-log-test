@@ -1,13 +1,26 @@
 # ProdLog — Nawasentra's Junior Software Engineer Hiring Coding Test Repo
 
-A pre-wired scaffold for a 90-minute live coding test. The product requirements are **not** in
-this file. The specification is sent to you when the session starts; paste it into
-[`TASK.md`](TASK.md) for reference.
+A pre-wired scaffold for a live coding test. The product requirements are in
+[`TASK.md`](TASK.md).
 
 Your job is to design the schema, API, and data shapes. This repo removes environment friction
 and shows the layering conventions you are expected to follow.
 
-## 10-minute quickstart
+## Get your own copy
+
+You do this live, at the start of the session — it's part of your 15 minutes of setup time.
+
+1. Open this repo on GitHub and click **"Use this template" → "Create a new repository"**.
+   Set it to **Private**.
+2. In your new repo: **Settings → Collaborators**, add the interviewer's GitHub username.
+3. Share your repo URL in the call.
+4. Clone your new repo and continue with the quickstart below.
+
+Use the setup time only to get your environment running — clone, configure `.env` files,
+install dependencies, confirm the app starts. Don't design the schema or write endpoint code
+yet; that starts when the coding timer does.
+
+## 15-minute quickstart
 
 ### 1. Prerequisites
 
@@ -89,7 +102,7 @@ npx expo start --web     # web is the minimum; emulator/device are optional
 ```
 production-log-test/
   README.md                     you are here
-  TASK.md                       paste the task specification here at session start
+  TASK.md                       the task specification
   docker-compose.yml            Postgres 16 on host port $POSTGRES_PORT (default 5432)
   scripts/doctor.py             stdlib-only environment checker
   shared/types.ts               shared TypeScript types (import type only, never redefined)
