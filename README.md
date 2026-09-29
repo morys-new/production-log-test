@@ -49,7 +49,10 @@ createdb production_log_test
 ```
 
 Then set `DATABASE_URL` in `backend/.env` (created in step 3) to your own user, password and
-port. Docker and a default local install both use 5432; if that port is taken, see Troubleshooting.
+port. The Docker setup here uses port 5434 (not Postgres's default 5432) specifically so it
+doesn't collide with a Postgres you may already have installed locally. A local install
+typically uses 5432 by default — set that port in `DATABASE_URL` instead if you're using your
+own local Postgres.
 
 ### 3. Backend
 
@@ -103,7 +106,7 @@ npx expo start --web     # web is the minimum; emulator/device are optional
 production-log-test/
   README.md                     you are here
   TASK.md                       the task specification
-  docker-compose.yml            Postgres 16 on host port $POSTGRES_PORT (default 5432)
+  docker-compose.yml            Postgres 16 on host port $POSTGRES_PORT (default 5434)
   scripts/doctor.py             stdlib-only environment checker
   shared/types.ts               shared TypeScript types (import type only, never redefined)
   backend/
