@@ -27,11 +27,16 @@ yet; that starts when the coding timer does.
 - Python 3.10+, git, and either Docker or a local Postgres 13+ installation.
 - Node 20.19.4+ (or 22.13+, 24.3+) and npm. The mobile toolchain (React Native 0.86) rejects
   older Node 20/22 releases. `nvm install 20` picks a compatible version.
+- **`python` vs `python3`:** commands below use `python`. On Windows this is normally correct.
+  On most Linux distros and current macOS, there is no `python` on PATH — use `python3`
+  instead everywhere you see `python` in this README.
 - Run the doctor first (stdlib only, safe to run before installing anything). Expect a few
   FAILs until setup is done; run it again at the end with the backend venv activated:
 
 ```bash
 python scripts/doctor.py
+# macOS/Linux, if `python` is not found:
+python3 scripts/doctor.py
 ```
 
 ### 2. Start Postgres
@@ -45,8 +50,24 @@ docker compose up -d prodlog-db
 **Option B — local Postgres**
 
 ```bash
+# macOS (Homebrew) — createdb runs as your own user by default
 createdb production_log_test
 ```
+
+```powershell
+# Windows — the installer doesn't map your Windows user to a Postgres role;
+# this prompts for the postgres password you set during install
+createdb -U postgres production_log_test
+```
+
+```bash
+# Linux — Postgres usually only trusts the `postgres` system user by default
+sudo -u postgres createdb production_log_test
+```
+
+If `createdb` isn't on PATH, use pgAdmin or `psql` to create the database instead. On Linux, if
+you'd rather have a role matching your own username (so plain `createdb` works), create one
+first: `sudo -u postgres createuser -s $(whoami)`.
 
 Then set `DATABASE_URL` in `backend/.env` (created in step 3) to your own user, password and
 port. The Docker setup here uses port 5434 (not Postgres's default 5432) specifically so it
@@ -57,9 +78,9 @@ own local Postgres.
 ### 3. Backend
 
 ```bash
-# bash
+# bash (macOS/Linux — use python3 if python is not on PATH)
 cd backend
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements-dev.txt
 cp .env.example .env          # edit DATABASE_URL if your credentials differ
@@ -190,8 +211,20 @@ Expo Go on your device must support the Expo SDK in `mobile/package.json` (SDK 5
 ## Troubleshooting
 
 **Port already in use**
+
+Find and stop whatever is using the port:
 ```bash
-# find the PID and kill it, or change the port:
+# macOS / Linux
+lsof -i :8000
+kill -9 <PID>
+```
+```powershell
+# Windows (PowerShell)
+netstat -ano | findstr :8000
+taskkill /PID <PID> /F
+```
+Or just use a different port:
+```bash
 uvicorn main:app --reload --port 8001
 ```
 If you move the backend, update `NEXT_PUBLIC_API_BASE_URL` in `web/.env` and
@@ -233,7 +266,11 @@ Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
 **Wrong Node version**
-Use nvm: `nvm install 20 && nvm use 20`. Or download directly from https://nodejs.org.
+- macOS/Linux: use [nvm](https://github.com/nvm-sh/nvm): `nvm install 20 && nvm use 20`.
+- Windows: `nvm` (posix) doesn't work here — install
+  [nvm-windows](https://github.com/coreybutler/nvm-windows) separately, then the same commands
+  work: `nvm install 20` and `nvm use 20`.
+- Or just download the right version directly from https://nodejs.org.
 
 **`docker compose` not found**
 Older Docker installs ship it as `docker-compose` (with a hyphen). Use that spelling, or
