@@ -18,9 +18,9 @@ assumption below is a choice that can be revisited.
 | `GET /pits`, `POST /pits` | List pits, create a pit (names are unique, ignoring case) |
 | `GET /entries?status=&pit_id=` | List entries, newest report date first; both filters optional |
 | `POST /entries` | Log an entry; it always starts as `draft` |
-| `GET /entries/{id}` | One entry |
-| `PATCH /entries/{id}` | Correct `planned_tonnes` / `actual_tonnes` while not approved |
-| `PATCH /entries/{id}/status` | Move an entry through the workflow |
+| `GET /entries/{entry_id}` | One entry |
+| `PATCH /entries/{entry_id}` | Correct `planned_tonnes` / `actual_tonnes` while not approved |
+| `PATCH /entries/{entry_id}/status` | Move an entry through the workflow |
 | `GET /summary?date_from=&date_to=` | Manager summary (see below) |
 
 Every error uses the `{"error": {"code", "message"}}` envelope, request validation included
@@ -68,8 +68,9 @@ Every error uses the `{"error": {"code", "message"}}` envelope, request validati
 9. Web and mobile filter the loaded list on the client ("without re-fetching"). The API also
    supports server-side `?status=&pit_id=` filtering.
 10. There is no pagination, which suits the size of this exercise.
-11. The web page creates entries but does not change their status; the spec only asks for
-    creation there. Status changes work through the API (`/docs`).
+11. Beyond the spec, the web entry list has a Submit button for drafts and an Approve button
+    (with a confirmation) for submitted entries. Sending an entry back to draft is API-only
+    (`/docs`).
 
 ### Notes
 

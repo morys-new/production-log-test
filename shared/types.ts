@@ -68,13 +68,13 @@ export interface EntryCreate {
   actual_tonnes: number;
 }
 
-/** Body of PATCH /entries/{id}: at least one field. Rejected once approved. */
+/** Body of PATCH /entries/{entry_id}: at least one field. Rejected once approved. */
 export interface EntryNumbersUpdate {
   planned_tonnes?: number;
   actual_tonnes?: number;
 }
 
-/** Body of PATCH /entries/{id}/status. */
+/** Body of PATCH /entries/{entry_id}/status. */
 export interface EntryStatusUpdate {
   status: EntryStatus;
 }
