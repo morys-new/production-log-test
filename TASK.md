@@ -14,7 +14,7 @@ These are the product requirements. Your design should serve them.
 - An operator can correct the numbers of an entry while it is not yet approved.
 - Business rule: once an entry is approved it is locked. Its status cannot change and its numbers cannot be edited. Enforce this in the backend, not just the frontend.
 - Users can view all entries and filter them by status and/or pit.
-- A user can see a summary that a mine manager would find useful. What it contains is your design decision. Think about what a manager actually needs to know, and use the primer.
+- A user can see a summary that a mine manager would find useful. What it contains is your design decision. Think about what a manager actually needs to know.
 - Web and mobile display entries and allow filtering. The web app also allows creating entries.
 
 ## Technical constraints

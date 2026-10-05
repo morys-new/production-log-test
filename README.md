@@ -27,16 +27,23 @@ yet; that starts when the coding timer does.
 - Python 3.10+, git, and either Docker or a local Postgres 13+ installation.
 - Node 20.19.4+ (or 22.13+, 24.3+) and npm. The mobile toolchain (React Native 0.86) rejects
   older Node 20/22 releases. `nvm install 20` picks a compatible version.
-- **`python` vs `python3`:** commands below use `python`. On Windows this is normally correct.
-  On most Linux distros and current macOS, there is no `python` on PATH — use `python3`
-  instead everywhere you see `python` in this README.
+- **Which Python command to use (before the virtual environment exists):**
+  - **macOS/Linux:** `python3`. There is no `python` command on these systems.
+  - **Windows:** `python`. If it isn't found, use `py`, the Python launcher, which works even
+    when `python` isn't on PATH.
+  - Once the backend virtual environment is activated (step 3), plain `python` and `pip` work on
+    every OS, so the later commands in this README use `python`.
 - Run the doctor first (stdlib only, safe to run before installing anything). Expect a few
   FAILs until setup is done; run it again at the end with the backend venv activated:
 
 ```bash
-python scripts/doctor.py
-# macOS/Linux, if `python` is not found:
+# macOS/Linux
 python3 scripts/doctor.py
+```
+
+```powershell
+# Windows
+python scripts/doctor.py      # if `python` is not found: py scripts/doctor.py
 ```
 
 ### 2. Start Postgres
@@ -78,10 +85,10 @@ own local Postgres.
 ### 3. Backend
 
 ```bash
-# bash (macOS/Linux — use python3 if python is not on PATH)
+# bash (macOS/Linux)
 cd backend
 python3 -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate     # from here on, `python` and `pip` exist (they are the venv's)
 pip install -r requirements-dev.txt
 cp .env.example .env          # edit DATABASE_URL if your credentials differ
 python scripts/apply_migration.py
@@ -89,7 +96,7 @@ uvicorn main:app --reload
 
 # PowerShell
 cd backend
-python -m venv .venv
+python -m venv .venv          # if `python` is not found, use: py -m venv .venv
 .venv\Scripts\Activate.ps1    # if blocked: Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 pip install -r requirements-dev.txt
 cp .env.example .env
@@ -196,6 +203,9 @@ errors.py
 | Mobile lint | `cd mobile && npm run lint` |
 | Mobile types | `cd mobile && npm run type-check` |
 
+The `python` commands above need the backend virtual environment activated, or Windows. On
+macOS/Linux, outside the venv, run `python3 scripts/doctor.py` instead.
+
 ## Mobile networking notes
 
 - **Android emulator:** use `http://10.0.2.2:8000` (maps to host `localhost`).
@@ -259,6 +269,18 @@ The backend reads `CORS_ORIGINS` from `backend/.env`. Add your frontend origin:
 ```
 CORS_ORIGINS=http://localhost:3000,http://localhost:8081
 ```
+
+**Windows: `python` not found, "Python was not found; run without arguments to install from the Microsoft Store", or `python -m venv` fails**
+`python` only works if Python's installer had "Add python.exe to PATH" ticked; otherwise
+Windows' Microsoft Store stub (or a different Python such as Anaconda) answers instead. Use the
+`py` launcher as an alternative to `python`; it doesn't depend on PATH:
+```powershell
+py --list                 # shows the Pythons installed on this machine
+py -m venv .venv          # same as: python -m venv .venv
+py scripts/doctor.py      # same as: python scripts/doctor.py
+```
+Pick a 3.10+ interpreter with `py -3.12 -m venv .venv` (use whichever version `py --list` shows).
+After `.venv\Scripts\Activate.ps1`, plain `python` and `pip` work.
 
 **PowerShell: `.venv\Scripts\Activate.ps1` blocked**
 ```powershell
