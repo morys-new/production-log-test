@@ -6,6 +6,82 @@ A pre-wired scaffold for a live coding test. The product requirements are in
 Your job is to design the schema, API, and data shapes. This repo removes environment friction
 and shows the layering conventions you are expected to follow.
 
+## Implementation notes
+
+What I built on the scaffold, and the decisions behind it. The spec leaves these open, so each
+assumption below is a choice that can be revisited.
+
+### API
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /pits`, `POST /pits` | List pits, create a pit (names are unique, ignoring case) |
+| `GET /entries?status=&pit_id=` | List entries, newest report date first; both filters optional |
+| `POST /entries` | Log an entry; it always starts as `draft` |
+| `GET /entries/{id}` | One entry |
+| `PATCH /entries/{id}` | Correct `planned_tonnes` / `actual_tonnes` while not approved |
+| `PATCH /entries/{id}/status` | Move an entry through the workflow |
+| `GET /summary?date_from=&date_to=` | Manager summary (see below) |
+
+Every error uses the `{"error": {"code", "message"}}` envelope, request validation included
+(`VALIDATION_ERROR`, 422). Other codes: `PIT_NAME_TAKEN` (409), `PIT_NOT_FOUND` (422),
+`DUPLICATE_ENTRY` (409), `REPORT_DATE_IN_FUTURE` (422), `ENTRY_NOT_FOUND` (404),
+`ENTRY_LOCKED` (409), `INVALID_STATUS_TRANSITION` (409), `INVALID_DATE_RANGE` (422).
+
+### Workflow and the approved lock
+
+- Allowed transitions: draft → submitted, submitted → approved, submitted → draft (sent back).
+  Any other move is `INVALID_STATUS_TRANSITION`; any change to an approved entry is
+  `ENTRY_LOCKED`.
+- The service layer enforces this with one guarded `UPDATE … WHERE status …` statement, so the
+  check and the write cannot be split by a concurrent request.
+- A database trigger also rejects any UPDATE or DELETE of an approved row, as a safety net for
+  clients that bypass the API.
+
+### Summary: what a mine manager sees
+
+- Planned vs actual tonnes, variance and achievement %, kept separate for ore and overburden:
+  one combined number would hide whether the mine is producing ore or only moving waste.
+- Stripping ratio (overburden tonnes per ore tonne), planned and actual, the main cost driver of
+  an open-pit mine.
+- Entry counts per status, showing how much of the picture is still provisional.
+- The same figures per pit, including pits with no entries yet (shown as zeros), to spot which
+  pit is behind or has not reported.
+- An optional inclusive date range; all dates by default.
+
+### Assumptions
+
+1. There is one mine ("Test Mine A"), so there is no mines table.
+2. Shifts are `day` and `night` (two 12-hour shifts); the spec does not name them.
+3. A pit has at most one entry per report date, shift and material. A second one would
+   double-count tonnes in the summary, so it is rejected with 409.
+4. Tonnes are non-negative with at most 2 decimals (`NUMERIC(12,2)`); extra precision is
+   rejected rather than rounded. A plan of 0 is allowed and gives a null achievement %.
+5. A report date cannot be in the future (by the server's local date).
+6. Only the numbers can be corrected, as the spec says. Pit, date, shift and material are fixed
+   once logged.
+7. There is no authentication or role model: the spec names operators and supervisors but no
+   login, so anyone can submit, approve or send back. With auth, approving and sending back
+   would be supervisor-only.
+8. Summary totals include draft and submitted entries, to give a live picture; the status counts
+   show how much is not final yet. Approved-only totals would be a one-line filter.
+9. Web and mobile filter the loaded list on the client ("without re-fetching"). The API also
+   supports server-side `?status=&pit_id=` filtering.
+10. There is no pagination, which suits the size of this exercise.
+11. The web page creates entries but does not change their status; the spec only asks for
+    creation there. Status changes work through the API (`/docs`).
+
+### Notes
+
+- `migration.sql` is re-runnable: it drops and recreates the tables, so **re-running it deletes
+  all data**. (`apply_migration.py --reset` refuses database names without "test".)
+- `shared/types.ts` is types-only, so the status, shift and material labels exist in both
+  `web/lib/labels.ts` and `mobile/lib/labels.ts`. `Record<Union, string>` makes type-check fail
+  if a new value has no label.
+- Checked with `ruff check` and `mypy --strict` (backend), `tsc` and `eslint` (web and mobile),
+  an end-to-end API smoke test, and manual browser tests of web and of the mobile web build.
+  The pull-to-refresh gesture still needs a device (Expo Go).
+
 ## Get your own copy
 
 You do this live, at the start of the session — it's part of your 15 minutes of setup time.
