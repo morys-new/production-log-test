@@ -4,12 +4,16 @@ from urllib.parse import urlparse
 
 import asyncpg
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import get_settings
 from db.client import close_pool, create_pool
-from errors import ApiError, api_error_handler
+from errors import ApiError, api_error_handler, validation_error_handler
+from routers.entries import router as entries_router
 from routers.health import router as health_router
+from routers.pits import router as pits_router
+from routers.summary import router as summary_router
 
 
 @asynccontextmanager
@@ -41,7 +45,14 @@ def create_app() -> FastAPI:
     )
 
     app.add_exception_handler(ApiError, api_error_handler)  # type: ignore[arg-type]
+    app.add_exception_handler(
+        RequestValidationError,
+        validation_error_handler,  # type: ignore[arg-type]
+    )
     app.include_router(health_router)
+    app.include_router(pits_router)
+    app.include_router(entries_router)
+    app.include_router(summary_router)
 
     return app
 
