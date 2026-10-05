@@ -133,7 +133,8 @@ h3 {
   align-items: start;
 }
 
-@media (max-width: 860px) {
+/* Below this width the entry table no longer fits beside the form. */
+@media (max-width: 1220px) {
   .workspace {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -312,6 +313,11 @@ button:focus-visible {
 .button-secondary {
   background: var(--surface);
   color: var(--accent);
+}
+
+.button-small {
+  padding: 4px 10px;
+  font-size: 0.85rem;
 }
 
 .alert {

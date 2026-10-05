@@ -107,7 +107,11 @@ export default function HomePage() {
             </section>
             <section className="card">
               <h2>Entries</h2>
-              <EntryList entries={dashboard.entries} pits={dashboard.pits} />
+              <EntryList
+                entries={dashboard.entries}
+                pits={dashboard.pits}
+                onChanged={load}
+              />
             </section>
           </div>
         </>
